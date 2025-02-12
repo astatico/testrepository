@@ -1,6 +1,41 @@
 package testcode.samples;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 public class ArraySample {
+
+    private void workWithArray() {
+        int[] array = {10, 20, 30};
+        System.out.println(array[1]); // Выводит: 20
+        System.out.println(array.length); // Выводит: 3
+
+        // Следующая строка вызовет исключение
+        System.out.println(array[3]); // ArrayIndexOutOfBoundsException
+    }
+
+    private void initArray() {
+        int[] numbers = {1, 2, 3, 4, 5};
+        int[] newNumbers = new int[5]; // Создание пустого массива из 5 элементов
+        newNumbers[0] = 10; // Присваивание значений
+
+        // Заполнение массива значениями
+        Arrays.fill(newNumbers, 7); // Все элементы будут равны 7
+    }
+
+    private void deepToStringExample() {
+        int[][] matrix = {
+                {1, 2, 3},
+                {4, 5, 6}
+        };
+        System.out.println(Arrays.deepToString(matrix));
+    }
+
+    private void arraySort() {
+        Integer[] array = {10, 20, 30};
+        Arrays.sort(array); // Сортировка по возрастанию
+        Arrays.sort(array, Collections.reverseOrder()); // Сортировка по убыванию (для объектов Integer)
+    }
 
     private void oneDimensionalArray() {
         // Создаем массив, в котором будут храниться оценки студентов

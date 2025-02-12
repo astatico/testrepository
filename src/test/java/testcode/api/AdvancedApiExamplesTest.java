@@ -117,6 +117,24 @@ public class AdvancedApiExamplesTest {
                 body("values.name", not(empty()));
     }
 
+    @Test
+    public void validateComplexResponseWithoutPatterns() {
+        given().
+                auth().preemptive().basic("username", "password").
+                log().all().
+                when().
+                get("https://api.bitbucket.org/2.0/repositories/username").
+                then().
+                log().body().
+                assertThat().
+                statusCode(200).
+                body("values.size()", greaterThanOrEqualTo(3)).
+                body("values.name", everyItem(not(emptyString()))).
+                body("values.is_private", hasItem(true)).
+                body("values.is_private", hasItem(false)).
+                body("values.links.html.href", everyItem(startsWith("https://bitbucket.org/")));
+    }
+
     @Test(dataProvider = "repositoryData")
     public void testParameterizedRepositoryCreation(String repoName, String description) {
         String requestBody = "{\n" +
