@@ -9,6 +9,8 @@ import static org.hamcrest.Matchers.*;
 
 public class AdvancedApiExamplesTest {
 
+    //BitBucket API
+
     @Test
     public void testQueryParameters() {
         given().
@@ -165,6 +167,121 @@ public class AdvancedApiExamplesTest {
         return new Object[][]{
                 {"repo1", "Первый репозиторий"},
                 {"repo2", "Второй репозиторий"}
+        };
+    }
+
+    // GitHub API
+    @Test
+    public void testQueryParametersGitHub() {
+        given().
+                auth().preemptive().basic("your-username", "your-personal-access-token").
+                queryParam("per_page", 5). // Ограничиваем список до 5 записей
+                log().all(). // Логируем запрос
+                when().
+                get("https://api.github.com/users/astatico/repos"). // Запрашиваем репозитории
+                then().
+                log().all(). // Логируем ответ
+                assertThat().
+                statusCode(200). // Проверяем, что запрос успешный
+                body("size()", lessThanOrEqualTo(5)); // Убеждаемся, что получено не более 5 репозиториев
+    }
+
+    @Test
+    public void testHeadersGitHub() {
+        given().
+                auth().preemptive().basic("your-username", "your-personal-access-token").
+                header("Accept", "application/vnd.github.v3+json"). // Указываем, что работаем с API v3
+                log().headers().
+                when().
+                get("https://api.github.com/repos/your-username/your-repository/branches"). // Запрос веток
+                then().
+                log().body().
+                assertThat().
+                statusCode(200). // Запрос успешный
+                body("size()", greaterThan(0)); // Должна быть хотя бы одна ветка
+    }
+
+    @Test
+    public void testCreateRepositoryGitHub() {
+        String requestBody = """
+                {
+                  "name": "test-repo",
+                  "description": "Тестовый репозиторий",
+                  "private": true
+                }""";
+
+        given().
+                auth().preemptive().basic("your-username", "your-personal-access-token").
+                header("Content-Type", "application/json").
+                body(requestBody).
+                log().body().
+                when().
+                post("https://api.github.com/user/repos").
+                then().
+                log().all().
+                assertThat().
+                statusCode(201). // Проверяем, что репозиторий создан
+                body("name", equalTo("test-repo")); // Проверяем, что имя совпадает
+    }
+
+    @Test
+    public void testBearerTokenGitHub() {
+        String token = "your-bearer-token";
+
+        given().
+                header("Authorization", "Bearer " + token).
+                log().all().
+                when().
+                get("https://api.github.com/user").
+                then().
+                log().all().
+                assertThat().
+                statusCode(200). // Запрос успешный
+                body("login", equalTo("your-username")); // Проверяем имя пользователя
+    }
+
+    @Test
+    public void testArrayValidationGitHub() {
+        given().
+                auth().preemptive().basic("your-username", "your-personal-access-token").
+                log().all().
+                when().
+                get("https://api.github.com/users/astatico/repos").
+                then().
+                log().body().
+                assertThat().
+                statusCode(200).
+                body("size()", greaterThanOrEqualTo(2)); // Проверяем, что у нас хотя бы 2 репозитория
+    }
+
+    @Test(dataProvider = "repositoryDataGitHub")
+    public void testParameterizedRepositoryCreationGitHub(String repoName, String description) {
+        String requestBody = "{\n" +
+                "  \"name\": \"" + repoName + "\",\n" +
+                "  \"description\": \"" + description + "\",\n" +
+                "  \"private\": true\n" +
+                "}";
+
+        given().
+                auth().preemptive().basic("your-username", "your-personal-access-token").
+                header("Content-Type", "application/json").
+                body(requestBody).
+                log().body().
+                when().
+                post("https://api.github.com/user/repos").
+                then().
+                log().all().
+                assertThat().
+                statusCode(201). // Репозиторий создан
+                body("name", equalTo(repoName)); // Проверяем, что имя совпадает
+    }
+
+    @DataProvider(name = "repositoryDataGitHub")
+    public Object[][] createRepositoryDataGitHub() {
+        return new Object[][] {
+                {"repo1", "Первый тестовый репозиторий"},
+                {"repo2", "Второй тестовый репозиторий"},
+                {"repo3", "Третий тестовый репозиторий"}
         };
     }
 }
